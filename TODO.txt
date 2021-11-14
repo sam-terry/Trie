@@ -1,0 +1,9 @@
+- Write and test code for pruning function
+	- For now, the pruning threshhold is <40 instances of a particular trigram. This should be temporarily be reduced to maybe 2 or three for testing purposes.
+
+- Write and test code for UpdateProbs function
+	- This should be a public function which is not called by any other methods in the TrigramTrie class
+	- It should probably only be called once for a given language's trie, once the entire corpus has been scanned and its trigrams have been added
+	- I think that trigram scores will have to be stored in a .db file anyway. As such, if a trigram exists in one language's trie but not another, a constant smoothing value should be stored
+		in the database for each language which does not contain the trigram. This way, trigrams which do not occur for a particular language wouldn't have to be stored in that language's trie,
+		and could instead just be assigned a constant smoothing value for those languages in which the trigram does not occur. 
