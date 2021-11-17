@@ -10,6 +10,7 @@ TrigramTrie::TrigramTrie(char language[4]) {
 
     // Set root for the trie
     this->root = rt;
+    this->trigramCount = 0;
 
     // Set lang for the tree
     strcpy(this->lang,language);
@@ -20,6 +21,42 @@ TrigramTrie::~TrigramTrie() {}
 void TrigramTrie::PrintLanguage() {
     std::cout << this->lang << std::endl;
 
+}
+
+void TrigramTrie::PrintTrieContents(std::shared_ptr<UnigramNode> start, std::string gram) {
+
+    // Starting point is root if no starting point is passed
+    std::shared_ptr<UnigramNode> startingPoint = (!start) ? (this->root) : start;
+
+
+    // BASE CASE: starting point is a leaf node, representing a trigram to be printed
+    if (startingPoint->isLeaf) {
+
+        // Print the trigram and its count
+        std::cout << gram << ", " << startingPoint->count << std::endl;
+
+
+        return;
+    }
+
+
+    // Recursive case: starting point is an internal node
+    else {
+
+        // If internal starting node has no children, then that node is the root of an empty trie
+        if ((startingPoint->progeny).empty()) {
+            std::cout << "Trie is empty." << std::endl;
+        }
+
+        // For each child in the starting node's progeny map
+        for (auto it = (startingPoint->progeny).begin(); it != (startingPoint->progeny).end(); ++it) {
+
+            // Recursively print tree contents for that child and it's corresponding character
+            PrintTrieContents(it->second, gram + it->first);
+        }
+    }
+
+    return;
 }
 
 std::shared_ptr<UnigramNode> TrigramTrie::InitNode(char c) {
@@ -63,32 +100,60 @@ void TrigramTrie::InsertTrigram(char trigram[4]) {
         ++trigram_pos;
     }
 
+    // increment the trie's count of trigrams
+    ++(this->trigramCount);
+
     // Incremenent the count of the leaf node, which represents the count for that trigram
     ++(current->count);
     (current->isLeaf) = true;
 
 }
 
-void TrigramTrie::PrintTrie() {
-    std::shared_ptr<UnigramNode> current = this->root;
+bool TrigramTrie::Prune(std::shared_ptr<UnigramNode> start) {
 
-    std::cout << "root -> " << std::endl;
+    // Create a starting point, using either the optional parameter for recursive calls or the trie root
+    std::shared_ptr<UnigramNode> startingPoint = (!start) ? (this->root) : start;
 
-    auto it = (current->progeny).find('s');
-    std::cout << it->first << " -> ";
+    // BASE CASE: starting point is a leaf (representing an entire trigram)
+    if (startingPoint->isLeaf) {
 
-    current = it->second;
-    it = (current->progeny).find('a');
-    std::cout << it->first << " -> ";
 
-    current = it->second;
-    it = (current->progeny).find('m');
-    std::cout << it->first << std::endl;
+        // If the count for the trigram is below the pruning threshhold, remove it from the tree
+        if ((startingPoint->count) < 10) {
 
-    current = it->second;
-    std::cout << current->unigram << " count: " << current->count << std::endl;
+            // Reduce trie's trigram count by the number of instances of the removed trigram
+            (this->trigramCount) = (this->trigramCount) - (startingPoint->count);
+            return true;
+        }
 
-    if (current->isLeaf) {
-        std::cout << current->unigram << " is a leaf node." << std::endl;
+        return false;
     }
+
+
+    // RECURSIVE CASE: starting point is an internal node
+    else {
+
+        // next_it is used to specify the next iterator in the map, since sometimes the iterator is erased
+        for (auto it = (startingPoint->progeny).begin(), next_it = it; it != (startingPoint->progeny).end(); it = next_it) {
+
+            // Increment next iterator
+            ++next_it;
+
+            bool isPruned = Prune(it->second);
+            if (isPruned) {
+                (startingPoint->progeny).erase(it);
+            }
+
+        }
+
+        if ((startingPoint->progeny).empty()) {
+            return true;
+        }
+
+        else {return false;}
+    }
+
 }
+
+
+
