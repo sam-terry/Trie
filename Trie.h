@@ -23,12 +23,12 @@ class Trie {
         // Generate a node with the specified character
         std::shared_ptr<UnigramNode> InitNode(char c); 
 
-        // Number of different trigrams which occur in the language's tree
+        // Number of different ngrams which occur in the language's tree
         int ngramCount;
         
     public:
     
-        // Constructor; create trigram LM trie for the language with the specified code
+        // Constructor; create trie for the language with the specified code
         Trie(char language[4]);
 
         // Destructor (empty with use of smart pointers)
@@ -40,11 +40,11 @@ class Trie {
         // Testing method used to print all trigrams in the trie with their corresponding counts
         void PrintTrieContents(std::shared_ptr<UnigramNode> start = nullptr, std::string gram = "");
 
-        // Inserts the specified trigram into the tree;
-        void InsertGram(char trigram[]);
+        // Inserts the specified ngram into the tree;
+        void InsertGram(char gram[]);
 
         /*
-         * Prunes the tree, removing less common trigrams
+         * Prunes the tree, removing less common ngrams
          * @param start (optional) -- the starting point for the trie traversal
             * The optional argument allows the function to be called recursively on particular nodes in the trie
             * If such a starting node is not specified, the function instead begins at the root
@@ -56,7 +56,7 @@ class Trie {
         // Return the number of trigrams stored in the trie
         int GetOverallCount() {return this->ngramCount;}
 
+        // Return the number of instances of a particular n-gram in the model--0 if the n gram does not exist
+        int Lookup(char gram[]);
 
-        // Recursively update the log prob scores of each trigram in the trie
-        // void UpdateProbs(std::optional <std::shared_ptr<UnigramNode> > start);
 };

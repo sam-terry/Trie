@@ -155,5 +155,26 @@ bool Trie::Prune(std::shared_ptr<UnigramNode> start) {
 
 }
 
+int Trie::Lookup(char gram[]) {
+    if (!strlen(gram)) {
+        return 0;
+    }
+
+    std::shared_ptr<UnigramNode> current = this->root;
+    int string_pos = 0;
+
+    while (string_pos < strlen(gram)) {
+
+        auto it = (current->progeny).find(gram[string_pos]);
+
+        if (it == (current->progeny).end()) {return 0;}
+        else {
+            current = it->second;
+        }
 
 
+        ++string_pos;
+    }
+
+    return current->count;
+}
